@@ -14,7 +14,9 @@ class MapView: UIViewController, MKMapViewDelegate {
     // MARK: Properties
     var pins: [Pin]?
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+//    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+//
+    var fetchedResultsController: NSFetchedResultsController<Pin>!
     
     var dataController: DataController!
     
@@ -26,20 +28,32 @@ class MapView: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
-        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
+        setupFetchResultsController()
     }
     
     //MARK: CoreData fetch request
-    func fetchPins () {
+//    func fetchPins () {
+//        do {
+//            pins = try context.fetch(Pin.fetchRequest())
+//        } catch {
+//
+//        }
+//    }
+    
+    fileprivate func setupFetchResultsController() {
+        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "pin")
+        
         do {
-            pins = try context.fetch(Pin.fetchRequest())
+            try fetchedResultsController.performFetch()
         } catch {
-            
+            fatalError("Data Error: \(error.localizedDescription)")
         }
     }
+    
     
     // MARK: - MKMapViewDelegate
 
