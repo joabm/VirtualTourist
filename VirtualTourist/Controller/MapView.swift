@@ -10,6 +10,12 @@ import MapKit
 
 class MapView: UIViewController, MKMapViewDelegate {
     
+    // MARK: Properties
+    var pins: [Pin] = []
+    
+    var dataController:DataController!
+    
+    
     // MARK: Outlets
     @IBOutlet weak var mapView: MKMapView!
     

@@ -9,6 +9,8 @@ import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    var window: UIWindow?
 
     let dataController = DataController(modelName: "VirtualTourist")
 
@@ -17,6 +19,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //use a trailing closure @ dC.load() to update the main UI to display a loading
         //interface while data loads.
         dataController.load()
+        
+        //configure first view and inject the dataController dependency into MapView
+        let navigationController = window?.rootViewController as! UINavigationController
+        let mapView = navigationController.topViewController as! MapView
+        mapView.dataController = dataController
+        
         return true
     }
 
