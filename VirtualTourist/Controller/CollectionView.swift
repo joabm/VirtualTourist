@@ -10,4 +10,9 @@ import UIKit
 
 class CollectionView: UIViewController, UICollectionViewDelegate {
     
+    // MARK: Properties
+    
+    var selectedPin: Pin!
+    var dataController: DataController!
+    
 }

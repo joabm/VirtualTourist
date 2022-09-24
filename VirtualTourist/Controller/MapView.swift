@@ -16,7 +16,7 @@ class MapView: UIViewController, MKMapViewDelegate {
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    var dataController:DataController!
+    var dataController: DataController!
     
     
     // MARK: Outlets
@@ -63,12 +63,21 @@ class MapView: UIViewController, MKMapViewDelegate {
         return pinView
     }
 
+    //on tap pin select, send latitude and longitude to Collection view on segue
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         let pin = Pin(context: dataController.viewContext)
         pin.latitude = (view.annotation?.coordinate.latitude)!
         pin.longitude = (view.annotation?.coordinate.longitude)!
         
         performSegue(withIdentifier: "segueToCollection", sender: pin)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.destination is CollectionView {
+            let controller = segue.destination as? CollectionView
+            controller?.dataController = dataController
+            controller?.selectedPin = sender as? Pin
+        }
     }
 
 }
