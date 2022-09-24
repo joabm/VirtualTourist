@@ -13,13 +13,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
 //    var window: UIWindow?
 
-    let dataController = DataController(modelName: "VirtualTourist")
+//    let dataController = DataController(modelName: "VirtualTourist")
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         //use a trailing closure @ dC.load() to update the main UI to display a loading
         //interface while data loads.
-        dataController.load()
+        //dataController.load()
         
         //configure first view and inject the dataController dependency into MapView
 //        let navigationController = window?.rootViewController as! UINavigationController
@@ -87,19 +87,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
-    
-
-//    func applicationDidEnterBackground(_ application: UIApplication) {
-//        saveViewContext()
-//    }
-//
-//    func applicationWillTerminate(_ application: UIApplication) {
-//        saveViewContext()
-//    }
-//
-//    func saveViewContext(){
-//        try? dataController.viewContext.save()
-//    }
-
 }
 

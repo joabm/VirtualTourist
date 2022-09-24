@@ -8,5 +8,5 @@
 import Foundation
 
 extension Pin {
-    //custom code added to the auto generated classes
+    //custom code added to the auto generated class
 }
