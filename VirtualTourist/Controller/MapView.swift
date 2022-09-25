@@ -12,10 +12,7 @@ import CoreData
 class MapView: UIViewController, MKMapViewDelegate {
     
     // MARK: Properties
-    var pins: [Pin]?
-    
-//    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-//
+
     var fetchedResultsController: NSFetchedResultsController<Pin>!
     
     var dataController: DataController!
@@ -28,17 +25,16 @@ class MapView: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        
+        longPressGesture.minimumPressDuration = 1.5
+        mapView.addGestureRecognizer(longPressGesture)
+        
         setupFetchResultsController()
     }
     
-    //MARK: CoreData fetch request
-//    func fetchPins () {
-//        do {
-//            pins = try context.fetch(Pin.fetchRequest())
-//        } catch {
-//
-//        }
-//    }
+    //MARK: CoreData fetch requests
     
     fileprivate func setupFetchResultsController() {
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
@@ -54,6 +50,55 @@ class MapView: UIViewController, MKMapViewDelegate {
         }
     }
     
+    //gets saved pins from the store and annotates the map
+    func getPinsFromStore () {
+        
+        var pins: [MKAnnotation] = []
+        
+        //loops through pins in the store to build the pins array
+        for pin in fetchedResultsController.fetchedObjects! {
+            let latitude = CLLocationDegrees(pin.latitude)
+            let longitude = CLLocationDegrees(pin.longitude)
+            
+            let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            
+            pins.append(annotation)
+        }
+        
+        mapView.addAnnotations(pins)
+    }
+    
+    
+    //MARK:  Handle long press on map
+    
+    @objc func handleLongPress(longPressGesture: UIGestureRecognizer) {
+        if longPressGesture.state == .ended {
+            //converts the location of a long press on map to coordinate form
+            let location = longPressGesture.location(in: mapView)
+            let locationCoordinates = mapView.convert(location, toCoordinateFrom: mapView)
+            
+            //extracts coordinate values
+            let latitude = locationCoordinates.latitude
+            let longitude = locationCoordinates.longitude
+            
+            //creates a pin and saves it to the store
+            let pin = Pin(context: dataController.viewContext)
+            pin.latitude = latitude
+            pin.longitude = longitude
+            try? dataController.viewContext.save()
+            
+            //adds the pin to the map
+            let coordinate  = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            mapView.addAnnotation(annotation)
+            
+        }
+        
+    }
     
     // MARK: - MKMapViewDelegate
 
