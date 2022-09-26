@@ -13,11 +13,6 @@ class MapView: UIViewController, MKMapViewDelegate {
     
     // MARK: Properties
     
-    //zoom properties for zoom persistence
-    let zoomLat = "latitude"
-    let zoomLong = "longitude"
-    let zoomSpan = "zoomLevel"
-    
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     var fetchedResultsController: NSFetchedResultsController<Pin>!
@@ -40,7 +35,7 @@ class MapView: UIViewController, MKMapViewDelegate {
         
         setupFetchResultsController()
         getPinsFromStore()
-        persistZoom()
+        retrieveZoom()
 
     }
     
@@ -82,8 +77,9 @@ class MapView: UIViewController, MKMapViewDelegate {
         mapView.addAnnotations(pins)
     }
     
-    func persistZoom() {
-        let coordinate = CLLocationCoordinate2D(latitude: UserDefaults.standard.double(forKey: zoomLat), longitude: UserDefaults.standard.double(forKey: zoomLong))
+    //retrieves zoom levels from UserDefaults
+    func retrieveZoom() {
+        let coordinate = CLLocationCoordinate2D(latitude: UserDefaults.standard.double(forKey: "latitude"), longitude: UserDefaults.standard.double(forKey: "longitude"))
         let span = MKCoordinateSpan(latitudeDelta: UserDefaults.standard.double(forKey: "latitudeDelta"), longitudeDelta: UserDefaults.standard.double(forKey: "longitudeDelta"))
         
         mapView.setRegion(MKCoordinateRegion(center: coordinate, span: span), animated: true)
@@ -159,8 +155,8 @@ class MapView: UIViewController, MKMapViewDelegate {
     
     //saves zoom settings to UserDefaults
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        UserDefaults.standard.set(mapView.centerCoordinate.latitude, forKey: zoomLat)
-        UserDefaults.standard.set(mapView.centerCoordinate.longitude, forKey: zoomLong)
+        UserDefaults.standard.set(mapView.centerCoordinate.latitude, forKey: "latitude")
+        UserDefaults.standard.set(mapView.centerCoordinate.longitude, forKey: "longitude")
         UserDefaults.standard.set(mapView.region.span.latitudeDelta, forKey: "latitudeDelta")
         UserDefaults.standard.set(mapView.region.span.longitudeDelta, forKey: "longitudeDelta")
     }
