@@ -11,9 +11,20 @@ import CoreData
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
-//    var window: UIWindow?
-
-//    let dataController = DataController(modelName: "VirtualTourist")
+    //sets mapView if the app have never launched before
+    func checkIfFirstLaunch(){
+        if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore")){
+            print("App has launched before")
+        } else {
+            print("This is the first launch ever")
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            UserDefaults.standard.set(0.0, forKey: "latitude")
+            UserDefaults.standard.set(-90.0, forKey: "longitude")
+            UserDefaults.standard.set(108.6, forKey: "latitudeDelta")
+            UserDefaults.standard.set(60.0, forKey: "longitudeDelta")
+        }
+    }
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -25,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        let navigationController = window?.rootViewController as! UINavigationController
 //        let mapView = navigationController.topViewController as! MapView
 //        mapView.dataController = dataController
+        checkIfFirstLaunch()
         
         return true
     }

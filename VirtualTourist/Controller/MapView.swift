@@ -12,6 +12,13 @@ import CoreData
 class MapView: UIViewController, MKMapViewDelegate {
     
     // MARK: Properties
+    
+    //zoom properties for zoom persistence
+    let zoomLat = "latitude"
+    let zoomLong = "longitude"
+    let zoomSpan = "zoomLevel"
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     var fetchedResultsController: NSFetchedResultsController<Pin>!
     
@@ -28,10 +35,13 @@ class MapView: UIViewController, MKMapViewDelegate {
         
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
         
-        longPressGesture.minimumPressDuration = 1.5
+        longPressGesture.minimumPressDuration = 1.0
         mapView.addGestureRecognizer(longPressGesture)
         
         setupFetchResultsController()
+        getPinsFromStore()
+        persistZoom()
+
     }
     
     //MARK: CoreData fetch requests
@@ -41,7 +51,7 @@ class MapView: UIViewController, MKMapViewDelegate {
         let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
         
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: "pin")
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: "pin")
         
         do {
             try fetchedResultsController.performFetch()
@@ -61,6 +71,7 @@ class MapView: UIViewController, MKMapViewDelegate {
             let longitude = CLLocationDegrees(pin.longitude)
             
             let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+            //print(coordinate)
             
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
@@ -71,6 +82,13 @@ class MapView: UIViewController, MKMapViewDelegate {
         mapView.addAnnotations(pins)
     }
     
+    func persistZoom() {
+        let coordinate = CLLocationCoordinate2D(latitude: UserDefaults.standard.double(forKey: zoomLat), longitude: UserDefaults.standard.double(forKey: zoomLong))
+        let span = MKCoordinateSpan(latitudeDelta: UserDefaults.standard.double(forKey: "latitudeDelta"), longitudeDelta: UserDefaults.standard.double(forKey: "longitudeDelta"))
+        
+        mapView.setRegion(MKCoordinateRegion(center: coordinate, span: span), animated: true)
+        
+    }
     
     //MARK:  Handle long press on map
     
@@ -85,10 +103,10 @@ class MapView: UIViewController, MKMapViewDelegate {
             let longitude = locationCoordinates.longitude
             
             //creates a pin and saves it to the store
-            let pin = Pin(context: dataController.viewContext)
+            let pin = Pin(context: context)
             pin.latitude = latitude
             pin.longitude = longitude
-            try? dataController.viewContext.save()
+            try? context.save()
             
             //adds the pin to the map
             let coordinate  = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -124,11 +142,11 @@ class MapView: UIViewController, MKMapViewDelegate {
 
     //on tap pin select, send latitude and longitude to Collection view on segue
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        let pin = Pin(context: dataController.viewContext)
+        let pin = Pin(context: context)
         pin.latitude = (view.annotation?.coordinate.latitude)!
         pin.longitude = (view.annotation?.coordinate.longitude)!
         
-        performSegue(withIdentifier: "segueToCollection", sender: pin)
+        performSegue(withIdentifier: "segueToPhotos", sender: pin)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -137,6 +155,14 @@ class MapView: UIViewController, MKMapViewDelegate {
             controller?.dataController = dataController
             controller?.selectedPin = sender as? Pin
         }
+    }
+    
+    //saves zoom settings to UserDefaults
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        UserDefaults.standard.set(mapView.centerCoordinate.latitude, forKey: zoomLat)
+        UserDefaults.standard.set(mapView.centerCoordinate.longitude, forKey: zoomLong)
+        UserDefaults.standard.set(mapView.region.span.latitudeDelta, forKey: "latitudeDelta")
+        UserDefaults.standard.set(mapView.region.span.longitudeDelta, forKey: "longitudeDelta")
     }
 
 }
