@@ -48,11 +48,43 @@
 		48590CC628DD7A7800A6B33D /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				48590CD128E1865F00A6B33D /* Data */,
+				48590CCE28E1861200A6B33D /* FlickrClient */,
+				48590CCF28E1863000A6B33D /* FlickrRequests */,
+				48590CD028E1864600A6B33D /* FlickrResponses */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		48590CCE28E1861200A6B33D /* FlickrClient */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = FlickrClient;
+			sourceTree = "<group>";
+		};
+		48590CCF28E1863000A6B33D /* FlickrRequests */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = FlickrRequests;
+			sourceTree = "<group>";
+		};
+		48590CD028E1864600A6B33D /* FlickrResponses */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = FlickrResponses;
+			sourceTree = "<group>";
+		};
+		48590CD128E1865F00A6B33D /* Data */ = {
+			isa = PBXGroup;
+			children = (
 				48590CC728DD7CF100A6B33D /* VirtualTourist.xcdatamodeld */,
 				48590CCA28DE1BBD00A6B33D /* Pin + Extra.swift */,
 				48590CCC28DE1E6400A6B33D /* DataController.swift */,
 			);
-			path = Model;
+			path = Data;
 			sourceTree = "<group>";
 		};
 		488635E728DC37A900D80FFB = {
