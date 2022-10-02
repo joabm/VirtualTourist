@@ -146,8 +146,8 @@ class MapView: UIViewController, MKMapViewDelegate {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.destination is CollectionView {
-            let controller = segue.destination as? CollectionView
+        if segue.destination is PhotoExplorerView {
+            let controller = segue.destination as? PhotoExplorerView
             controller?.dataController = dataController
             controller?.selectedPin = sender as? Pin
         }
