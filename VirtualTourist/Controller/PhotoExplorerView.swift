@@ -31,6 +31,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     @IBOutlet weak var newCollectionButton: UIBarButtonItem!
     
     
+    // MARK: Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
@@ -40,6 +41,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         newCollectionButton.isHidden = true
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionViewFlowLayout()
         mapAnnotaion()
         if selectedPin.photos?.count == 0 {
             getPhotoURL(completion: {
@@ -50,9 +52,6 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             })
         }
         setupFetchedResultsController()
-        
-        //print(FlickrClient.Endpoint.queryPhotosList(selectedPin.latitude, selectedPin.longitude).url)
-        
     }
     
     // MARK: Core Data Fetch
@@ -144,8 +143,8 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     }
 }
 
-    // MARK: Collection View
-extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSource {
+    // MARK: Collection View Extension
+extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
         
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return fetchedResultsController.fetchedObjects!.count
@@ -189,6 +188,16 @@ extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSourc
             collectionView.deleteItems(at: [indexPath])
             collectionView.reloadData()
         }
+    }
+    
+    // MARK: FlowLayout
+    
+    func collectionViewFlowLayout() {
+        let space: CGFloat = 1.0
+        let dimension = (view.frame.size.width - (2 * space)) / 1.5
+        flowLayout.minimumLineSpacing = space
+        flowLayout.minimumInteritemSpacing = space
+        flowLayout.itemSize = CGSize(width: dimension, height: dimension)
     }
     
 }
