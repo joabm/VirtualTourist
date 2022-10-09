@@ -97,7 +97,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             mapView.setRegion(coordinateRegion, animated: true)
         }
     
-    // MARK: Retrieve Photos
+    // MARK: Retrieve Photo URLs
     
     func getPhotoURL(completion: @escaping () -> Void) {
         setActivityIndicator(true)
@@ -121,18 +121,6 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             }
         }
     }
-    
-    // MARK: Save to CoreData
-    
-//    func savePhotosToStore(photos: [FlickrPhoto]){
-//        for flickrPhoto in photos {
-//            let photo = Photo(context: context)
-//            //photo.urlString  = flickrPhoto.urlString()
-//            //come back and fix.
-//
-//
-//        }
-//    }
     
     
     // MARK: Activity Indicator
@@ -160,24 +148,47 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
 extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSource {
         
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return fetchedResultsController.sections?.count ?? 1
+        return fetchedResultsController.fetchedObjects!.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         newCollectionButton.isEnabled = true
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionCell", for: indexPath) as! PhotoCollectionCell
-        let collectionPhoto = fetchedResultsController.object(at: indexPath)
+        let storePhoto = fetchedResultsController.object(at: indexPath) //get any existing photo image from the datastore
         
-        cell.imageView.image = UIImage(data: collectionPhoto.image!)
-        cell.imageView.contentMode = UIView.ContentMode.scaleAspectFill
-        
-        try? context.save()
-        
+        if let photo = storePhoto.photo { //if there is already a photo in the store display it
+            cell.imageView.image = UIImage(data: photo)
+        } else { //otherwise download a photo from Flickr
+            if let url = storePhoto.url{
+                let photoURL = url
+                FlickrClient.getImage(path: URL(string: photoURL)!) { data, error in
+                    guard let data = data else {
+                        return
+                    }
+                    storePhoto.photo = data
+                    storePhoto.pin = self.selectedPin
+                    try? self.context.save() // save the image to the store with the pin relationship
+                    DispatchQueue.main.async { //display the image on the main thread
+                        if let photo = storePhoto.photo {
+                            cell.imageView.image = UIImage(data: photo)
+                        }
+                    }
+                }
+            }
+        }
         return cell
-        
     }
+        
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        //TODO Code for deleting photo from collection
+        let storePhoto = fetchedResultsController.object(at: indexPath)
+        context.delete(storePhoto)
+        try? context.save() //delete the selected photo from the store and save the change
+        self.setupFetchedResultsController()
+        DispatchQueue.main.async { //delete the selected photo from the collection view and update the view data
+            collectionView.deleteItems(at: [indexPath])
+            collectionView.reloadData()
+        }
     }
     
 }
