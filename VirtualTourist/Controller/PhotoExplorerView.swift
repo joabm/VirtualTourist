@@ -21,9 +21,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     var selectedPin: Pin!
     
     var dataController: DataController!
-    
-    var locationPhotos = [UIImage]()
-    
+        
     // MARK: Outlets
     
     @IBOutlet weak var mapView: MKMapView!
@@ -43,7 +41,16 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         collectionView.delegate = self
         collectionView.dataSource = self
         mapAnnotaion()
-        getLocationPhotos()
+        if selectedPin.photos?.count == 0 {
+            getPhotoURL(completion: {
+                self.collectionView.reloadData()
+                if self.selectedPin.photos?.count == 0 {
+                    self.showFailure(message: "There are not photos for this location")
+                }
+            })
+        }
+        setupFetchedResultsController()
+        
         //print(FlickrClient.Endpoint.queryPhotosList(selectedPin.latitude, selectedPin.longitude).url)
         
     }
@@ -92,28 +99,58 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     
     // MARK: Retrieve Photos
     
-    func getLocationPhotos() {
-        FlickrClient.getLocationPhotos(latitude: selectedPin.latitude, longitude: selectedPin.longitude, completion: handleLocationPhotosListResponse(location:error:))
-    }
-    
-    func handleLocationPhotosListResponse(location: [Photos], error: Error?) {
-        if error == nil {
-            print("you have data")
-        } else {
-            showFailure(message: error?.localizedDescription ?? "")
+    func getPhotoURL(completion: @escaping () -> Void) {
+        setActivityIndicator(true)
+        FlickrClient.getLocationPhotos(latitude: selectedPin.latitude, longitude: selectedPin.longitude) { (bool, data, error) in
+            print("getlocationPhotos excecuted")
+            if bool {
+                for photo in data!.photos.photo {
+                    let photoURL = FlickrClient.photoURL(photo: photo)
+                    let photo = Photo(context: self.context)
+                    photo.url = photoURL
+                    photo.pin = self.selectedPin
+                    try? self.context.save()
+                }
+                self.setupFetchedResultsController()
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                    self.setActivityIndicator(false)
+                }
+            } else {
+                self.showFailure(message: "\(error?.localizedDescription ?? "error")")
+            }
         }
     }
     
+    // MARK: Save to CoreData
+    
+//    func savePhotosToStore(photos: [FlickrPhoto]){
+//        for flickrPhoto in photos {
+//            let photo = Photo(context: context)
+//            //photo.urlString  = flickrPhoto.urlString()
+//            //come back and fix.
+//
+//
+//        }
+//    }
     
     
+    // MARK: Activity Indicator
     
+    func setActivityIndicator(_ isFinding: Bool) {
+        if isFinding {
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.stopAnimating()
+        }
+    }
     
     
     
     // MARK: Failure messaging
     
     func showFailure(message: String) {
-        let alertVC = UIAlertController(title: "Photo data error", message: message, preferredStyle: .alert)
+        let alertVC = UIAlertController(title: "Photo Data", message: message, preferredStyle: .alert)
         alertVC.addAction(UIAlertAction(title: "Dismiss", style: .default, handler: nil))
         present(alertVC, animated: true, completion: nil)
     }
@@ -123,21 +160,19 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
 extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSource {
         
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if locationPhotos.count == 0 {
-            return 30
-        } else  {
-            return locationPhotos.count
-        }
+        return fetchedResultsController.sections?.count ?? 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         newCollectionButton.isEnabled = true
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionCell", for: indexPath) as! PhotoCollectionCell
-//        if locationPhotos.count > 0 {
-//            DispatchQueue.main.async {
-//                cell?.cell
-//            }
-//        }
+        let collectionPhoto = fetchedResultsController.object(at: indexPath)
+        
+        cell.imageView.image = UIImage(data: collectionPhoto.image!)
+        cell.imageView.contentMode = UIView.ContentMode.scaleAspectFill
+        
+        try? context.save()
+        
         return cell
         
     }

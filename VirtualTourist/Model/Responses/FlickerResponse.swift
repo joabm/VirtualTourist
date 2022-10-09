@@ -16,21 +16,18 @@ struct FlickrPhotos: Codable {
     let page: Int
     let pages: Int
     let perpage: Int
-    let total: Int
-    let photo: [Photos]
+    let total: String
+    let photo: [FlickrPhoto]
 }
 
-struct Photos: Codable {
-    let id: Int
+struct FlickrPhoto: Codable {
+    let id: String
     let owner: String
     let secret: String
-    let server: Int
+    let server: String
     let title: String
     let ispublic: Int
     let isfriend: Int
     let isfamily: Int
-    
-    func photoURL() -> String {
-        return "https://live.staticflickr.com/\(server)/\(id)_\(secret).jpg"
-    }
 }
+

@@ -24,7 +24,7 @@ class FlickrClient {
         var stringValue: String {
             switch self {
             case .queryPhotosList(let latitude, let longitude):
-                return Endpoint.baseUrl + "api_key=" + Auth.flickrKey + "&lat=\(latitude)&lon=\(longitude)&per_page=30&page=\(Int.random(in: 0..<4000))&format=json&nojsoncallback=1"
+                return Endpoint.baseUrl + "api_key=" + Auth.flickrKey + "&lat=\(latitude)&lon=\(longitude)&per_page=21&page=\(Int.random(in: 0..<4000))&format=json&nojsoncallback=1"
                 
             }
         }
@@ -35,9 +35,6 @@ class FlickrClient {
         
     }
     
-    func test(){
-        print(Endpoint.queryPhotosList(3.0, 4.0).url)
-    }
     
     class func requestImageFile(url: URL, completion: @escaping (UIImage?, Error?) -> Void) {
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
@@ -50,53 +47,51 @@ class FlickrClient {
         }
         task.resume()
     }
-
-    class func getLocationPhotos(latitude: Double, longitude: Double, completion: @ escaping ([Photos], Error?) -> Void ) {
-        taskForGETRequest(url: Endpoint.queryPhotosList(latitude, longitude).url, response: FlickrResponse.self) { response, error in
-            //debugPrint(Endpoint.queryPhotosList(latitude, longitude).url)
-            if let response = response {
-                print(response.photos.photo)
-                completion(response.photos.photo, nil)
-            } else {
-                completion([], error)
-            }
-        }
-    }
     
-    @discardableResult class func taskForGETRequest<ResponseType: Decodable>(url: URL, response: ResponseType.Type, completion: @escaping (ResponseType?, Error?) -> Void) -> URLSessionTask {
-        let task = URLSession.shared.dataTask(with: url) {
-            data, response, error in
+    class func getLocationPhotos(latitude: Double, longitude: Double, completionHandler: @escaping (Bool, FlickrResponse?, Error?) -> Void) {
+        let url = Endpoint.queryPhotosList(latitude, longitude).url
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data else {
                 DispatchQueue.main.async {
-                    completion(nil, error)
+                    completionHandler(false, nil, error)
                 }
                 return
             }
             
-            debugPrint(String(data: data, encoding: .utf8)!)
+            //debugPrint(String(data: data, encoding: .utf8)!)
             let decoder = JSONDecoder()
-
+            
             do {
-                let responseObject = try decoder.decode(ResponseType.self, from: data)
-                print(responseObject)
+                let response = try decoder.decode(FlickrResponse.self, from: data)
                 DispatchQueue.main.async {
-                    completion(responseObject, nil)
+                    completionHandler(true, response, nil)
                 }
             } catch {
                 do {
                     let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
                     DispatchQueue.main.async {
-                        completion(nil, errorResponse)
+                        completionHandler(true, nil, errorResponse)
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        completion(nil, error)
+                        completionHandler(false, nil, error)
                     }
                 }
             }
         }
         task.resume()
-        return task
+    }
+    
+    class func photoURL(photo: FlickrPhoto) -> String {
+        let url = "https://live.staticflickr.com/\(photo.server)/\(photo.id)_\(photo.secret).jpg"
+        return url
+    }
+    
+    class func getImage(path: URL, completion: @escaping (Data?, Error?) -> Void) {
+        let task = URLSession.shared.dataTask(with: path) { data, response, error in
+                completion(data, error)
+        }
+        task.resume()
     }
     
     
