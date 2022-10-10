@@ -130,9 +130,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         newCollectionButton.isEnabled = false
         deleteStorePhotos()
         print(selectedPin.photos?.count as Any)
-        //collectionView.reloadData()
         retrievePhotos()
-        //collectionView.reloadData()
     }
     
     func deleteStorePhotos() {
@@ -140,9 +138,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             context.delete(photo)
         }
         try? context.save()
-//        DispatchQueue.main.async {
-//            self.collectionView.reloadData()
-//        }
+
     }
     
     
