@@ -22,7 +22,7 @@ class FlickrClient {
         var stringValue: String {
             switch self {
             case .queryPhotosList(let latitude, let longitude):
-                return Endpoint.baseUrl + "api_key=" + Auth.flickrKey + "&lat=\(latitude)&lon=\(longitude)&per_page=21&page=\(Int.random(in: 1..<3000))&format=json&nojsoncallback=1"
+                return Endpoint.baseUrl + "api_key=" + Auth.flickrKey + "&lat=\(latitude)&lon=\(longitude)&per_page=30&page=\(Int.random(in: 1..<3000))&format=json&nojsoncallback=1"
                 
             }
         }
@@ -59,7 +59,7 @@ class FlickrClient {
             let decoder = JSONDecoder()
             do {
                 let response = try decoder.decode(Photos.self, from: data)
-                print(response)
+                debugPrint(response.photos.photo[0])
                 DispatchQueue.main.async {
                     completionHandler(response, nil)
                 }
