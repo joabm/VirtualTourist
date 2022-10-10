@@ -125,6 +125,8 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         }
     }
     
+    // MARK: New Collection Button
+    
     @IBAction func newCollectionButtonTapped(sender: UIButton) {
         print("New Collection tapped")
         newCollectionButton.isEnabled = false
@@ -138,7 +140,6 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             context.delete(photo)
         }
         try? context.save()
-
     }
     
     
