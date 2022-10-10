@@ -140,7 +140,11 @@
                     </view>
                     <toolbarItems>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="QX4-zk-EIf"/>
-                        <barButtonItem title="New Collection" id="tiF-dW-02s"/>
+                        <barButtonItem title="New Collection" id="tiF-dW-02s">
+                            <connections>
+                                <action selector="newCollectionButtonTappedWithSender:" destination="u98-fl-zTU" id="HH6-KZ-JVK"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="JEh-PH-izY"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="fZE-K8-0Cl"/>

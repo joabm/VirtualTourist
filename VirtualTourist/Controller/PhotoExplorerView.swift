@@ -21,7 +21,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     var selectedPin: Pin!
     
     var dataController: DataController!
-        
+    
     // MARK: Outlets
     
     @IBOutlet weak var mapView: MKMapView!
@@ -32,9 +32,6 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     
     
     // MARK: Lifecycle
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -82,11 +79,11 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     }
     
     func centerMapOnLocation(_ location: CLLocation, mapView: MKMapView) {
-            let regionRadius: CLLocationDistance = 20000
-            let coordinateRegion = MKCoordinateRegion(center: location.coordinate,
-                                                      latitudinalMeters: regionRadius * 2.0, longitudinalMeters: regionRadius * 2.0)
-            mapView.setRegion(coordinateRegion, animated: true)
-        }
+        let regionRadius: CLLocationDistance = 20000
+        let coordinateRegion = MKCoordinateRegion(center: location.coordinate,
+                                                  latitudinalMeters: regionRadius * 2.0, longitudinalMeters: regionRadius * 2.0)
+        mapView.setRegion(coordinateRegion, animated: true)
+    }
     
     // MARK: Retrieve URLs and Photos
     
@@ -95,7 +92,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             getPhotoURL(completion: {
                 self.collectionView.reloadData()
                 if self.selectedPin.photos?.count == 0 {
-                    self.showFailure(message: "There are not photos for this location")
+                    print("There are not photos in the store for this location.")
                 }
             })
         }
@@ -123,6 +120,26 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
                 self.showFailure(message: "\(error?.localizedDescription ?? "error")")
             }
         }
+    }
+    
+    @IBAction func newCollectionButtonTapped(sender: UIButton) {
+        print("New Collection tapped")
+        newCollectionButton.isEnabled = false
+        deleteStorePhotos()
+        print(selectedPin.photos?.count as Any)
+        //collectionView.reloadData()
+        retrievePhotos()
+        //collectionView.reloadData()
+    }
+    
+    func deleteStorePhotos() {
+        for photo in fetchedResultsController.fetchedObjects! {
+            context.delete(photo)
+        }
+        try? context.save()
+//        DispatchQueue.main.async {
+//            self.collectionView.reloadData()
+//        }
     }
     
     
