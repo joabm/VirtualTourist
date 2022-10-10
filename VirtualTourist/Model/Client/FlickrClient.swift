@@ -12,8 +12,6 @@ class FlickrClient {
     
     struct Auth {
         static let flickrKey = "a5be689d46f4e4d3b4c6a45a6b8602e2"
-        static let secretKey = "490a82223e18ce1c"
-        
     }
         
     enum Endpoint {
@@ -24,7 +22,7 @@ class FlickrClient {
         var stringValue: String {
             switch self {
             case .queryPhotosList(let latitude, let longitude):
-                return Endpoint.baseUrl + "api_key=" + Auth.flickrKey + "&lat=\(latitude)&lon=\(longitude)&per_page=21&page=\(Int.random(in: 0..<4000))&format=json&nojsoncallback=1"
+                return Endpoint.baseUrl + "api_key=" + Auth.flickrKey + "&lat=\(latitude)&lon=\(longitude)&per_page=21&page=\(Int.random(in: 1..<3000))&format=json&nojsoncallback=1"
                 
             }
         }
@@ -48,33 +46,32 @@ class FlickrClient {
         task.resume()
     }
     
-    class func getLocationPhotos(latitude: Double, longitude: Double, completionHandler: @escaping (Bool, FlickrResponse?, Error?) -> Void) {
+    class func getLocationPhotos(latitude: Double, longitude: Double, completionHandler: @escaping (Photos?, Error?) -> Void) {
         let url = Endpoint.queryPhotosList(latitude, longitude).url
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data else {
                 DispatchQueue.main.async {
-                    completionHandler(false, nil, error)
+                    completionHandler(nil, error)
                 }
                 return
             }
-            
-            //debugPrint(String(data: data, encoding: .utf8)!)
+            debugPrint(String(data: data, encoding: .utf8)!)
             let decoder = JSONDecoder()
-            
             do {
-                let response = try decoder.decode(FlickrResponse.self, from: data)
+                let response = try decoder.decode(Photos.self, from: data)
+                print(response)
                 DispatchQueue.main.async {
-                    completionHandler(true, response, nil)
+                    completionHandler(response, nil)
                 }
             } catch {
                 do {
                     let errorResponse = try decoder.decode(ErrorResponse.self, from: data)
                     DispatchQueue.main.async {
-                        completionHandler(true, nil, errorResponse)
+                        completionHandler(nil, errorResponse)
                     }
                 } catch {
                     DispatchQueue.main.async {
-                        completionHandler(false, nil, error)
+                        completionHandler(nil, error)
                     }
                 }
             }
@@ -82,7 +79,7 @@ class FlickrClient {
         task.resume()
     }
     
-    class func photoURL(photo: FlickrPhoto) -> String {
+    class func photoURL(photo: PhotoURL) -> String {
         let url = "https://live.staticflickr.com/\(photo.server)/\(photo.id)_\(photo.secret).jpg"
         return url
     }

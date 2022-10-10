@@ -100,9 +100,9 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     
     func getPhotoURL(completion: @escaping () -> Void) {
         setActivityIndicator(true)
-        FlickrClient.getLocationPhotos(latitude: selectedPin.latitude, longitude: selectedPin.longitude) { (bool, data, error) in
+        FlickrClient.getLocationPhotos(latitude: selectedPin.latitude, longitude: selectedPin.longitude) { (data, error) in
             print("getlocationPhotos excecuted")
-            if bool {
+            if error == nil {
                 for photo in data!.photos.photo {
                     let photoURL = FlickrClient.photoURL(photo: photo)
                     let photo = Photo(context: self.context)
@@ -116,6 +116,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
                     self.setActivityIndicator(false)
                 }
             } else {
+                self.setActivityIndicator(false)
                 self.showFailure(message: "\(error?.localizedDescription ?? "error")")
             }
         }
