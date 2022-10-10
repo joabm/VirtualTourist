@@ -38,19 +38,11 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        newCollectionButton.isHidden = true
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionViewFlowLayout()
         mapAnnotaion()
-        if selectedPin.photos?.count == 0 {
-            getPhotoURL(completion: {
-                self.collectionView.reloadData()
-                if self.selectedPin.photos?.count == 0 {
-                    self.showFailure(message: "There are not photos for this location")
-                }
-            })
-        }
+        retrievePhotos()
         setupFetchedResultsController()
     }
     
@@ -96,7 +88,18 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
             mapView.setRegion(coordinateRegion, animated: true)
         }
     
-    // MARK: Retrieve Photo URLs
+    // MARK: Retrieve URLs and Photos
+    
+    func retrievePhotos () {
+        if selectedPin.photos?.count == 0 {
+            getPhotoURL(completion: {
+                self.collectionView.reloadData()
+                if self.selectedPin.photos?.count == 0 {
+                    self.showFailure(message: "There are not photos for this location")
+                }
+            })
+        }
+    }
     
     func getPhotoURL(completion: @escaping () -> Void) {
         setActivityIndicator(true)
@@ -133,8 +136,6 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         }
     }
     
-    
-    
     // MARK: Failure messaging
     
     func showFailure(message: String) {
@@ -143,6 +144,7 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         present(alertVC, animated: true, completion: nil)
     }
 }
+
 
     // MARK: Collection View Extension
 extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -194,10 +196,10 @@ extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSourc
     // MARK: FlowLayout
     
     func collectionViewFlowLayout() {
-        let space: CGFloat = 1.0
-        let dimension = (view.frame.size.width - (2 * space)) / 1.5
-        flowLayout.minimumLineSpacing = space
+        let space: CGFloat = 8.0
+        let dimension = (view.frame.size.width - (4 * space)) / 3.0
         flowLayout.minimumInteritemSpacing = space
+        flowLayout.minimumLineSpacing = space
         flowLayout.itemSize = CGSize(width: dimension, height: dimension)
     }
     
