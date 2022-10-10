@@ -30,7 +30,7 @@ class MapView: UIViewController, MKMapViewDelegate {
         
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
         
-        longPressGesture.minimumPressDuration = 1.0
+        longPressGesture.minimumPressDuration = 0.5
         mapView.addGestureRecognizer(longPressGesture)
         
         setupFetchResultsController()
