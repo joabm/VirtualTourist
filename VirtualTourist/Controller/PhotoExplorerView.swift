@@ -102,6 +102,9 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
         setActivityIndicator(true)
         FlickrClient.getLocationPhotos(latitude: selectedPin.latitude, longitude: selectedPin.longitude) { (data, error) in
             print("getlocationPhotos excecuted")
+            if data?.photos.total == 0 {
+                self.showFailure(message: "There are no photos at this location.  Zoom in for an accurate location selection.")
+            }
             if error == nil {
                 for photo in data!.photos.photo {
                     let photoURL = FlickrClient.photoURL(photo: photo)
