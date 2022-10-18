@@ -35,8 +35,6 @@ class PhotoExplorerView: UIViewController, MKMapViewDelegate, NSFetchedResultsCo
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView.delegate = self
-        collectionView.dataSource = self
         collectionViewFlowLayout()
         mapAnnotaion()
         retrievePhotos()
