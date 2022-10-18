@@ -47,7 +47,7 @@ class MapView: UIViewController, MKMapViewDelegate {
         fetchRequest.sortDescriptors = [sortDescriptor]
         
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: nil, cacheName: "pin")
-        
+                
         do {
             try fetchedResultsController.performFetch()
         } catch {
@@ -66,7 +66,6 @@ class MapView: UIViewController, MKMapViewDelegate {
             let longitude = CLLocationDegrees(pin.longitude)
             
             let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-            //print(coordinate)
             
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
@@ -103,6 +102,7 @@ class MapView: UIViewController, MKMapViewDelegate {
             pin.latitude = latitude
             pin.longitude = longitude
             try? context.save()
+            setupFetchResultsController()
             
             //adds the pin to the map
             let coordinate  = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -138,20 +138,20 @@ class MapView: UIViewController, MKMapViewDelegate {
 
     //on tap pin select, send latitude and longitude to Collection view on segue
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        let pin = Pin(context: context)
-        pin.latitude = (view.annotation?.coordinate.latitude)!
-        pin.longitude = (view.annotation?.coordinate.longitude)!
-        
-        performSegue(withIdentifier: "segueToPhotos", sender: pin)
+        let controller = storyboard?.instantiateViewController(withIdentifier: "PhotoExplorerView") as! PhotoExplorerView
+        let tappedPin = view.annotation as? MKPointAnnotation
+        let savedPins = fetchedResultsController.fetchedObjects!
+        for pin in savedPins {
+            if pin.latitude == tappedPin?.coordinate.latitude && pin.longitude == tappedPin?.coordinate.longitude {
+                controller.dataController = dataController
+                controller.selectedPin = pin
+                debugPrint("Latitude: \(String(describing: controller.selectedPin.latitude))), Longitude:  \(String(describing: controller.selectedPin.longitude)))")
+            }
+        }
+        navigationController?.pushViewController(controller, animated: true)
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.destination is PhotoExplorerView {
-            let controller = segue.destination as? PhotoExplorerView
-            controller?.dataController = dataController
-            controller?.selectedPin = sender as? Pin
-        }
-    }
+    // MARK: User defaults
     
     //saves zoom settings to UserDefaults
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
