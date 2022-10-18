@@ -174,6 +174,10 @@ extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSourc
         newCollectionButton.isEnabled = true
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionCell", for: indexPath) as! PhotoCollectionCell
+        
+        cell.activityIndicator.isHidden = false
+        cell.activityIndicator.startAnimating()
+        
         let storePhoto = fetchedResultsController.object(at: indexPath) //get any existing photo image from the datastore
         
         if let photo = storePhoto.photo { //if there is already a photo in the store display it
@@ -190,6 +194,7 @@ extension PhotoExplorerView: UICollectionViewDelegate, UICollectionViewDataSourc
                     try? self.context.save() // save the image to the store with the pin relationship
                     DispatchQueue.main.async { //display the image on the main thread
                         if let photo = storePhoto.photo {
+                            cell.activityIndicator.stopAnimating()
                             cell.imageView.image = UIImage(data: photo)
                         }
                     }
